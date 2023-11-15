@@ -2,13 +2,16 @@ from paystackpyAPI.transaction import Transaction
 from os import getenv
 api_key = getenv("PAYSTACK_KEY")
 
-transaction = Transaction(api_key)
+transaction = Transaction("sk_test_16ab153f788322cb0a137bb27952edea86ae0be1")
 
 # Example: Initialize a transaction
 email = 'customer@example.com'
 amount = 5000  # Replace with your desired amount
-optional_params = {'currency': 'NGN', 'callback_url': 'https://example.com/callback'}
 
+optional_params = {'callback_url': 'https://example.com/callback'}
+
+# authorization_code='AUTH_72btv547'
+currency = 'NGN'
 try:
     initialization_response = transaction.initialize_transaction(email, amount, **optional_params)
     print("Initialization Response:", initialization_response)
@@ -19,6 +22,7 @@ try:
     try:
         auth_code = initialization_response["response_from_api"]['data']['authorization_url']
         auth_code = auth_code.split('/')[-1]
+        print(auth_code)
         auth_transaction = transaction.charge_authorization(email, amount, auth_code, **optional_params)
         print("Authorization Response:", auth_transaction)
     except Exception as e:
@@ -51,5 +55,14 @@ try:
         print("export result :", export)
     except Exception as e:
         print("Error Exporting transactions:", str(e))
+
+    try:
+        authorization_code = initialization_response["response_from_api"]['data']['authorization_url']
+        authorization_code = authorization_code.split('/')[-1]
+        partial_debit_response = transaction.partial_debit(authorization_code, email, currency, amount, **optional_params)
+        print("Partial Debit:", partial_debit_response)
+    except Exception as e:
+        print("an error occured in partial debit:", str(e))
+
 except Exception as e:
     print("Error initializing transaction:", str(e))
