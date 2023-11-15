@@ -56,6 +56,7 @@ try:
     except Exception as e:
         print("Error Exporting transactions:", str(e))
 
+    # partial debit
     try:
         authorization_code = initialization_response["response_from_api"]['data']['authorization_url']
         authorization_code = authorization_code.split('/')[-1]
