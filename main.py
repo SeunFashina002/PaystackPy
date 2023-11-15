@@ -2,7 +2,7 @@ from paystackpyAPI.transaction import Transaction
 from os import getenv
 api_key = getenv("PAYSTACK_KEY")
 
-transaction = Transaction("sk_test_16ab153f788322cb0a137bb27952edea86ae0be1")
+transaction = Transaction(api_key)
 
 # Example: Initialize a transaction
 email = 'customer@example.com'
