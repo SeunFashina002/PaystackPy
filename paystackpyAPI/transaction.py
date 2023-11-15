@@ -65,6 +65,7 @@ class Transaction(PaystackAPI):
         self.transaction_timeline_url = "https://api.paystack.co/transaction/timeline"
         self.transaction_totals_url = "https://api.paystack.co/transaction/totals"
         self.export_transactions_url = "https://api.paystack.co/transaction/export"
+        self.partial_debit_url = "https://api.paystack.co/transaction/partial_debit"
         
 
     def initialize_transaction(self, email: str, amount: int, **kwargs):
@@ -387,3 +388,41 @@ class Transaction(PaystackAPI):
             raise APIError(500, f"Timeout Error: {errt}")
         except requests.exceptions.RequestException as err:
             raise APIError(500, f"An error occurred: {err}")
+
+    def partial_debit(self, authorization_code: str, email:str, currency:str, amount:str, **kwargs):
+        
+        
+        if not self.api_key:
+            raise APIError(400, "Invalid API key")
+        
+        if not authorization_code:
+            raise APIError(400, "Invalid authorization code")
+        
+        if not email:
+            raise APIError(400, "email is required")
+        
+        if not amount or not currency:
+            raise APIError(400, "Missing required parameters: amount and/or currency")
+
+        
+        optional_params = {key: value for key, value in kwargs.items() if key in self.INITIALIZATION_OPTIONAL_PARAMS}
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type' : 'application/json',
+        }
+
+        data = {
+            "authorization_code": authorization_code,
+            "currency": currency,        
+            "amount": amount * 100,
+            "email": email,
+            **optional_params    
+        }
+
+        response = requests.post(self.partial_debit_url, headers=headers, json=data)
+        if not response.status_code == 200:
+            error_message = response.text
+            raise APIError(response.status_code, error_message)
+
+        return response
+            
